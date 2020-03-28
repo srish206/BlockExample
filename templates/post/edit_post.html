@@ -1,0 +1,9 @@
+{% extends "index.html" %}
+{% block title %} edit post {% endblock %}
+{% block content %}
+<form action="{% url 'edit_post' obj.id %}" method="POST">
+		{% csrf_token %}
+		{{form.as_p}}
+	<input type="submit" value="Submit">
+</form>
+{% endblock %}

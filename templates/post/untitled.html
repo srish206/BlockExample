@@ -1,0 +1,296 @@
+from django.db import models
+from django.contrib.auth.models import User
+from datetime import date
+import datetime
+
+# Create your models here.
+
+
+class UserProfile(models.Model):
+	user = models.OneToOneField(User, on_delete=models.CASCADE)
+	is_auther = models.BooleanField(default=False)
+
+	def __str__(self):
+		return self.user.username
+
+class Post(models.Model):
+	title = models.CharField(max_length=20)
+	description = models.TextField()
+	# publish_date = models.DateField(default=datetime.date.today)
+	# update_date = models.DateField(default=datetime.date.today)
+	publish_date = models.DateField(auto_now_add=True)
+	update_date = models.DateField(auto_now=True)
+	publish = models.BooleanField(default=False)
+	like = models.IntegerField(default=0)
+	user = models.ManyToManyField(User)
+
+	def __str__(self):
+		return self.title
+#If the model field has blank=True, then required is set to False on the form field. Otherwise, required=True.
+
+class Comment(models.Model):
+	user = models.ForeignKey(User,on_delete=models.CASCADE)
+	post = models.ForeignKey(Post,on_delete=models.CASCADE, related_name="post")
+	text_field = models.TextField()
+	like = models.IntegerField(default=0)
+
+	def __str__(self):
+		return self.user.username
+
+	# def __str__(self):
+	# 	return self.text_field
+
+class PostLike(models.Model):
+	user = models.ForeignKey(User,on_delete=models.CASCADE)
+	post = models.ForeignKey(Post,on_delete=models.CASCADE)
+
+	def __str__(self):
+		return '%s %s' % (self.user.username,self.post)
+
+
+
+
+
+
+
+from django.shortcuts import render
+from django.shortcuts import redirect
+from django.http import HttpResponse
+from django.contrib.auth import authenticate,login
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import User
+
+from Wordoid.models import Post
+from Wordoid.models import Comment,PostLike
+import json
+import datetime
+
+from Wordoid.forms import PostForm
+from Wordoid.forms import CommentForm
+
+from django.template import loader
+import json
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
+
+# Create your views here.
+
+
+@csrf_exempt
+@login_required
+def show_post(request):
+	show_post = Post.objects.all()
+	# import pdb;pdb.set_trace()
+	dict_post = {
+		'all_post':show_post
+	}
+	return render(request,"post/show_post.html",dict_post)
+
+@csrf_exempt
+@login_required
+def change_post(request,id):
+	post=Post.objects.get(id=id)
+	# post_publish = post.publish if False else True
+	# post.publish = post_publish
+	# post.save()
+	# import pdb;pdb.set_trace()
+	if post.publish == False:
+		post.publish=True
+		post.save()
+		return redirect(publish_post)
+	elif post.publish == True:
+		post.publish=False
+		post.save()
+		return redirect(unpublish_post)
+
+
+@csrf_exempt
+def add_post(request):
+	# code for adding post
+	title = request.POST.get('"title')
+	description = request.POST.get('description')
+	today_date = datetime.datetime.now().strftime ("%Y-%m-%d")
+	up_date = datetime.datetime.now().strftime ("%Y-%m-%d")
+	# we have two methods to save post creat() and save()
+	post_instance = Post.objects.create(title=title,description=description,publish_date=today_date,update_date=up_date)
+	# post_instance = Post(title=title,description=description,publish_date=today_date,update_date=up_date)
+	# post_instance.save()
+
+
+@csrf_exempt
+def post_model_form(request):
+	if request.method == 'POST':
+		post_form = PostForm(request.POST)
+		if post_form.is_valid():
+			post_form.save()
+			show_post = Post.objects.all()
+			#objects.value
+			dict_post = {
+				'all_post':show_post
+			}
+			return render(request,"post/show_post.html",dict_post)
+	else:
+		post_form = PostForm()
+	return render(request,"post/post_form.html",{'form':post_form})
+
+
+
+
+@csrf_exempt
+def publish_post(request):	
+	posts = Post.objects.filter(publish=True)
+	dict_data = {
+		'pub_data':posts
+	}
+	return render(request,"post/publish_page.html",dict_data)
+
+# @csrf_exempt
+# def publish_post(request):
+# 	test = []
+# 	# comment={}
+# 	for posts in Post.objects.filter(publish=True):
+# 		for child in posts.post.all():
+# 			# import pdb;pdb.set_trace()
+# 			# test.append({'post':child.post.title,'comment':child.text_field})
+# 			import pdb;pdb.set_trace()
+# 			test.append([child.post.title,child.text_field])
+# 	# for post in posts:
+# 	# 	comment=post.post.values_list('text_field')[:2]
+# 	dict_data = {
+# 		'comment_data':test
+# 	}
+# 	# import pdb;pdb.set_trace()
+# 	return render(request,"post/publish_page.html",dict_data)
+
+@csrf_exempt
+def unpublish_post(request):
+	unpublish_data = Post.objects.filter(publish=False)
+	dict_data = {
+		'unpublish_data':unpublish_data
+	}
+	return render(request,"post/unpublish_page.html",dict_data)
+
+def view_post(request,id):
+	obj = Post.objects.get(id=id)
+	# obj = Post.objects.select_related('text_field').get(id=id)
+	#here we have to methods 
+	comment = []
+	# post_comment = obj.post.all()
+	# for comm in post_comment:
+	# 	comment.append(comm.text_field)
+	comment = obj.post.values_list('text_field')
+	data = Post.objects.filter(id=id).values('title','description','publish_date','update_date')
+	dict_data = {
+		'data':data,
+		'comment':comment
+	}
+	return render(request,"post/view_post.html",dict_data)
+
+def edit_post(request,id):
+	import pdb;pdb.set_trace()
+	obj = Post.objects.get(id=id)
+	if request.method == 'POST':
+		obj_form = PostForm(request.POST,instance=obj)
+		if obj_form.is_valid():
+			obj_form.save()
+			return redirect(publish_post)
+	
+	else:
+		obj_form = PostForm(instance=obj)
+	return render(request,"post/edit_post.html",{'form':obj_form,'obj':obj})
+
+
+def delete_post(request,id):
+	obj = Post.objects.get(id=id)
+	obj.delete()
+	return redirect(publish_post)
+
+
+def comment_post(request,id):
+	post = Post.objects.get(id=id)
+	if request.method == 'POST':
+		comment = CommentForm(request.POST)
+		if comment.is_valid():
+			instance = comment.save(commit=False)
+			instance.post = post
+			instance.user = request.user
+			instance.save()
+			return redirect(publish_post)
+	else:
+		obj_form = CommentForm()
+	return render(request,"post/comment_post.html",{'form':obj_form,'obj':post})
+
+
+@csrf_exempt
+def like_post(request,id):
+	import pdb;pdb.set_trace()
+	post = Post.objects.get(id=id)
+	# post_like=Post.objects.filter(user=request.user,title=post)
+	liked_user = PostLike.objects.filter(user=request.user,post=post).exists()
+	if not liked_user:
+		PostLike.objects.create(user=request.user,post=post)
+	else:
+		post_user=PostLike.objects.filter(user=request.user,post=post)
+		find_like = post_user[0].post.like
+		if find_like == 0:
+			find_like += 1
+			post.user.add(find_like)
+			# post_user[0].save()
+			# post.save()
+		elif find_like == 1:
+			find_like = 0
+			post.user.add(find_like)
+			# post.save()
+	return redirect(publish_post)
+
+
+
+
+@csrf_exempt
+def like_post(request,id):
+	post_list = []
+	post = Post.objects.get(id=id)
+	current_user = PostLike.objects.filter(user=request.user,post=post).exists()
+	like_obj = PostLike.objects.all()
+	if current_user == False:
+		PostLike.objects.create(user=request.user,post=post)
+		return HttpResponse("like")
+	for i in like_obj:
+		post_list.append(i.post)
+	if post in post_list:
+		if post.like == 0:
+			post.like += 1
+			post.save()
+		# else:
+		elif post.like == 1:
+			post.like = 0
+			post.save()
+
+	dict_data = {
+		'post': model_to_dict((post),fields=('title','like')),
+		'post_id': post.id
+	}
+	return HttpResponse(json.dumps(dict_data), content_type='application/json')
+
+	''' another way to json '''
+	# post_results = Post.objects.filter(id=id).values('title','like')
+	# return JsonResponse({'results':list(post_results)})
+	''' data get response in text formate but it is difficult to fetch the data value
+		in this formate''' 	
+	# return HttpResponse(json.dumps(dict_data), content_type="text/plain")
+	
+
+	# Error-it gives error bcoz post is objects of Post(queryset)
+	# return JsonResponse({'results':list(post)})
+
+
+
+
+
+
+
+
+	
+
+

@@ -1,0 +1,10 @@
+{% extends "index.html" %}
+{% block title %} edit post {% endblock %}
+{% block content %}
+<form action="{% url 'add_post_form' %}" method="POST">
+		{% csrf_token %}
+		{{ form.errors }}
+		{{form.as_p}}
+	<input type="submit" value="Submit">
+</form>
+{% endblock %}

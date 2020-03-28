@@ -1,0 +1,16 @@
+{% extends "index.html" %}
+{% load static %}
+{% block title %} view post {% endblock %}
+{% block content %}
+	{% for view in data %}
+		{{ view }}
+	{% endfor %}
+
+<!-- show comment in querysest -->
+	comment:{{ comment }}
+
+	{% for comment_view in comment %}
+		{{ comment_view }}
+	{% endfor %}
+
+{% endblock %}

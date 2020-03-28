@@ -1,0 +1,8 @@
+{% extends "index.html" %}
+{% block title %} unpublish post {% endblock %}
+{% block content %}
+	<h3>Unpublish post</h3>
+	{% for pub in unpublish_data %}
+		<li>{{ pub }}</li>
+	{% endfor %}
+{% endblock %}
