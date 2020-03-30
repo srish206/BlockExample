@@ -12,50 +12,31 @@
   <style>
     /* Set height of the grid so .sidenav can be 100% (adjust if needed) */
     .row.content {height: 1000px}
-    
-
     .nav-cls{
       text-align: left;
       background-color: lightpink;
       /*text-align: right;
       width: 37%;*/
     }
-
     .nav-tabs .nav-item .test-cls{
       text-align: right;
     }
-
-
-
-  .background-cls{
+    .background-cls{
       background-color: #e4cdcd;
     }
-
     /* Set gray background color and 100% height */
     .sidenav {
       background-color: #f1f1f1;
       height: 100%;
       width: 20%
     }
-
-    /*.nav-pills > li.active > a, {
-      background-color: lightpink;
-    }*/
-
-    .nav-pills>li.active>a:focus, .nav-pills>li.active>a {
+    .nav-pills>li.active>a: focus, .nav-pills>li.active>a {
       background-color: lightpink;
     }
-
-    .nav-pills>li.active>a:hover {
+    .nav-pills>li.active>a: hover {
         color: #fff;
         background-color: #e4cdcd;
       }
-    
-    /*.nav-pills>li.active>a, .nav-pills>li.active>a:focus, .nav-pills>li.active>a:hover {
-      color: #fff;
-      background-color: #a3c4e0;
-      }
-*/
     /* Set black background color, white text and some padding */
     footer {
       background-color: #555;
@@ -72,27 +53,6 @@
       .row.content {height: auto;} 
     }
 
-
-    /*.color{
-    background-color: #e4cdcd;
-    }
-    .card-action{
-      color: coral;
-    }
-    .user-css{
-      color: chocolate;
-    }
-    .delete-card{
-      font-size: 14px;
-    }
-    .heart-cls{
-      color: red;
-    }
-    .none-cls{
-      color: blue;
-    }*/
-
-
   </style>
 </head>
 <body>
@@ -101,12 +61,7 @@
   {% block css_content %}
   {% endblock %}
   <div class="row content">
-
     <div class="nav-cls">
-      <!-- <div class="section1"> -->
-        <!-- <h2>Posts World </h2> -->
-       <!--  <img src="/home/rails/qt-wkhtmltopdf/demos/logo32.png" width="50%" height="50%"> -->
-        <!-- <p>Turn the nav menu into navigation tabs with the .nav nav-tabs class. Add the active class to the active/current link. If you want the tabs to be togglable, see the last example on the tutorial page.</p> -->
         <ul class="nav nav-tabs">
         {% if user.is_authenticated %}
           <!-- <p>Welcome {{ user.username }} !!!</p> -->
@@ -122,16 +77,7 @@
           </li>
         {% endif %}
         </ul>
-          
-          <!-- <li class="nav-item">
-            <a class="nav-link" href="#">Link</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link disabled" href="#">Disabled</a>
-          </li> -->
-        </ul>
-      </div>
-    <!-- </div><br> -->
+    </div>
 
     <div class="col-sm-3 sidenav">
       <h4>Blog</h4>
@@ -141,33 +87,16 @@
         <li><a href="{% url 'publish_post' %}">Publish Post</a></li>
         <li><a href="{% url 'unpublish_post' %}">Unpublish Post</a></li>
         <li><a href="{% url 'add_post_form' %}">Add Post</a></li>
-        <!-- <li><a href="{% url 'publish_post' %}">Photos</a></li> -->
       </ul><br>
-      <!-- <div class="input-group">
-        <input type="text" class="form-control" placeholder="Search Blog..">
-        <span class="input-group-btn">
-          <button class="btn btn-default" type="button">
-            <span class="glyphicon glyphicon-search"></span>
-          </button>
-        </span>
-      </div> -->
     </div>
-
-    
-
     <div class="content container">
         <div class="row">
             <div class="col-md-8">
             {% block content %}
             {% endblock %}
-
-            
             </div>
         </div>
     </div>
-
-
-
   </div>
 </div>
 
