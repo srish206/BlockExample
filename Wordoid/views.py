@@ -70,7 +70,6 @@ def add_post(request):
     # post_instance.save()
 
 
-# @csrf_exempt
 def post_model_form(request):
 
     if request.method == 'POST':
@@ -85,7 +84,6 @@ def post_model_form(request):
     return render(request, "post/post_form.html", {'form': post_form})
 
 
-# @csrf_exempt
 def publish_post(request):
     user_post = Post.objects.filter(auther=request.user, publish=True)
     posts = get_paginated_objects(request, user_post)
@@ -95,7 +93,6 @@ def publish_post(request):
     return render(request, "post/publish_page.html", dict_data)
 
 
-# @csrf_exempt
 def unpublish_post(request):
     unpublish_data = Post.objects.filter(publish=False)
     dict_data = {
@@ -165,7 +162,6 @@ def comment_post(request, id):
             )
 
 
-# @csrf_exempt
 def like_post(request, id):
     like_user = False
     post = Post.objects.get(id=id)

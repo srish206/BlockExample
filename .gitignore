@@ -3,7 +3,8 @@
 # Edit at https://www.gitignore.io/?templates=django
 
 ### Django ###
-myvenv_1
+benv_1
+myvenv
 static
 *.log
 *.pot
