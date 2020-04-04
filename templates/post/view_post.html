@@ -2,15 +2,13 @@
 {% load static %}
 {% block title %} view post {% endblock %}
 {% block content %}
-	{% for view in data %}
-		{{ view }}
-	{% endfor %}
-
-<!-- show comment in querysest -->
-	comment:{{ comment }}
-
-	{% for comment_view in comment %}
-		{{ comment_view }}
-	{% endfor %}
-
+    {% for view in data %}
+        Title: {{ view.title }}<br>
+        Description: {{ view.description }}<br>
+        Publish Post: {{ view.publish_date }}<br>
+        Update Post: {{ view.update_date }}<br>
+        Comments: {% for comment in view.comment %}<br>
+                {{ comment }}
+        {% endfor %}
+    {% endfor %}
 {% endblock %}

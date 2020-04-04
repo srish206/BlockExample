@@ -1,33 +1,29 @@
 import datetime
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-# from django.contrib.auth import authenticate, login
-# from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.forms.models import model_to_dict
 from Wordoid.models import Post, Comment
 from Wordoid.forms import PostForm, CommentForm
 from Wordoid.utils import get_paginated_objects
-
+from silk.profiling.profiler import silk_profile
 
 # django-silk
-
+@silk_profile(name='View Blog Post')
 def home_page(request):
-    post_data = []
     posts = Post.objects.filter(
         publish=True).select_related(
         'auther').prefetch_related('liked_users', 'post').all()
-    for post in posts:
-        post_data.append({
-                "id": post.id,
-                "title": post.title,
-                "description": post.description,
-                "author": post.auther,
-                "is_liked": post.liked_users.filter(
-                    id=request.user.id).exists(),
-                "like_count": post.user_like,
-                "comments": post.post.all(),
-            })
+    post_data = [{
+                    "id": post.id,
+                    "title": post.title,
+                    "description": post.description,
+                    "author": post.auther,
+                    "is_liked": post.liked_users.filter(
+                        id=request.user.id).exists(),
+                    "like_count": post.user_like,
+                    "comments": post.post.all()
+                } for post in posts]
     dict_data = {
         'posts': get_paginated_objects(request, post_data),
     }
@@ -36,9 +32,9 @@ def home_page(request):
 
 @login_required
 def show_post(request):
-    show_all_post = Post.objects.filter(auther=request.user)
+    user_post = Post.objects.filter(auther=request.user)
     dict_post = {
-        'all_post': show_all_post
+        'all_post': user_post
     }
     return render(request, "post/show_post.html", dict_post)
 
@@ -71,22 +67,21 @@ def add_post(request):
 
 
 def post_model_form(request):
-
     if request.method == 'POST':
-        post_form = PostForm(request, request.POST)
-        if post_form.is_valid():
-            instance = post_form.save(commit=False)
+        add_post_form = PostForm(request, request.POST)
+        if add_post_form.is_valid():
+            instance = add_post_form.save(commit=False)
             instance.auther = request.user
             instance.save()
             return redirect(show_post)
     else:
-        post_form = PostForm(request)
-    return render(request, "post/post_form.html", {'form': post_form})
+        add_post_form = PostForm(request)
+    return render(request, "post/post_form.html", {'form': add_post_form})
 
 
 def publish_post(request):
-    user_post = Post.objects.filter(auther=request.user, publish=True)
-    posts = get_paginated_objects(request, user_post)
+    publish_post = Post.objects.filter(auther=request.user, publish=True)
+    posts = get_paginated_objects(request, publish_post)
     dict_data = {
         "posts": posts,
     }
@@ -94,28 +89,25 @@ def publish_post(request):
 
 
 def unpublish_post(request):
-    unpublish_data = Post.objects.filter(publish=False)
+    unpublish_post = Post.objects.filter(auther=request.user, publish=False)
     dict_data = {
-        'unpublish_data': unpublish_data
+        'unpublish_data': unpublish_post
     }
     return render(request, "post/unpublish_page.html", dict_data)
 
 
 def view_post(request, id):
     if request.user.is_authenticated:
-        data = []
-        comment = []
-        obj = Post.objects.get(id=id)
-        data.append({
-                        "title": obj.title,
-                        "description": obj.description,
-                        "publish_date": obj.publish_date,
-                        "update_date": obj.update_date,
-                    })
-        comment = obj.post.values_list('text_field')
+        post = Post.objects.get(id=id)
+        data = [{
+                "title": post.title,
+                "description": post.description,
+                "publish_date": post.publish_date,
+                "update_date": post.update_date,
+                "comment": post.post.values_list('text_field')
+                }]
         dict_data = {
             'data': data,
-            'comment': comment
         }
         return render(request, "post/view_post.html", dict_data)
     else:
@@ -123,24 +115,24 @@ def view_post(request, id):
 
 
 def edit_post(request, id):
-    obj = Post.objects.get(id=id)
+    post = Post.objects.get(id=id)
     if request.method == 'POST':
-        obj_form = PostForm(request, request.POST, instance=obj)
-        if obj_form.is_valid():
-            obj_form.save()
+        post_form = PostForm(request, request.POST, instance=post)
+        if post_form.is_valid():
+            post_form.save()
             return redirect(publish_post)
 
     else:
-        obj_form = PostForm(request, instance=obj)
+        post_form = PostForm(request, instance=obj)
     return render(
             request, "post/edit_post.html",
-            {'form': obj_form, 'obj': obj}
+            {'form': post_form, 'obj': post}
             )
 
 
 def delete_post(request, id):
-    obj = Post.objects.get(id=id)
-    obj.delete()
+    post = Post.objects.get(id=id)
+    post.delete()
     return redirect(publish_post)
 
 
@@ -155,10 +147,10 @@ def comment_post(request, id):
             instance.save()
             return redirect(publish_post)
     else:
-        obj_form = CommentForm()
+        comment_form = CommentForm()
     return render(
             request, "post/comment_post.html",
-            {'form': obj_form, 'obj': post}
+            {'form': comment_form, 'obj': post}
             )
 
 

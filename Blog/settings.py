@@ -135,6 +135,7 @@ STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
 )
 
+# SILKY_PYTHON_PROFILER = True
 
 AUTHENTICATION_BACKENDS = (
 
