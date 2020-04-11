@@ -2,15 +2,24 @@
 
 <style type="text/css">
 	
-	.color{
+    
+   .color{
     background-color: #e4cdcd;
     }
     .card-action{
       color: coral;
     }
-    .user-css{
-      color: chocolate;
+
+    @media (min-width: 1000px){
+      .container {
+        width: 1073px;
+      }
     }
+    .commen_css {
+      width: 1000px;
+    }
+
+
     .delete-card{
       font-size: 14px;
     }
@@ -20,7 +29,23 @@
     .none-cls{
       color: blue;
     }
-
+    .input-group {
+      padding-left: 16px;
+    }
+    .readmore {
+      padding: 2px 28px;
+    }
+    .textcss {
+      color: gray;
+      text-align: center;
+    }
+    .media-body {
+      text-align: center;
+    }
+    .complete{
+      display:none;
+    }
+    
 </style>
 
 

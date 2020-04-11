@@ -1,7 +1,6 @@
 $(document).ready(function(){
     $(document).on('click','.commen-cls',function(){
         post_id=$(this).parent().parent().attr('data-post')
-        // const _this = this;
         $.ajax({
                 type:"GET",
                 url:"/like-post/" + post_id,

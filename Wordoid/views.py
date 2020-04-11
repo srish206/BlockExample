@@ -1,3 +1,4 @@
+import json
 import datetime
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
@@ -8,7 +9,7 @@ from Wordoid.forms import PostForm, CommentForm
 from Wordoid.utils import get_paginated_objects
 from silk.profiling.profiler import silk_profile
 
-# django-silk
+
 @silk_profile(name='View Blog Post')
 def home_page(request):
     posts = Post.objects.filter(
@@ -18,16 +19,20 @@ def home_page(request):
                     "id": post.id,
                     "title": post.title,
                     "description": post.description,
+                    "des_len": len(post.description),
+                    "date": post.publish_date,
                     "author": post.auther,
                     "is_liked": post.liked_users.filter(
                         id=request.user.id).exists(),
                     "like_count": post.user_like,
-                    "comments": post.post.all()
+                    "comments": post.post.all(),
                 } for post in posts]
-    dict_data = {
-        'posts': get_paginated_objects(request, post_data),
-    }
-    return render(request, "post/home.html", dict_data)
+
+    posts_data = get_paginated_objects(request, post_data)
+
+    comment = CommentForm()
+    return render(request, "post/home.html",
+            {'posts': posts_data, 'form': comment})
 
 
 @login_required
@@ -52,15 +57,17 @@ def change_post(request, id):
 
 def add_post(request):
     # code to add a post
-    title = request.POST.get('"title')
-    description = request.POST.get('description')
+    title = request.POST.get("title")
+    description = request.POST.get("description")
     today_date = datetime.datetime.now().strftime("%Y-%m-%d")
     up_date = datetime.datetime.now().strftime("%Y-%m-%d")
     # we have two methods to save post creat() and save()
     Post.objects.create(
         title=title, description=description,
-        publish_date=today_date, update_date=up_date
+        publish_date=today_date, update_date=up_date,
+        auther=request.user
         )
+    # return redirect(add_post)
     ''' post_instance = Post(title=title,description=description,
         publish_date=today_date,update_date=up_date)'''
     # post_instance.save()
@@ -104,7 +111,7 @@ def view_post(request, id):
                 "description": post.description,
                 "publish_date": post.publish_date,
                 "update_date": post.update_date,
-                "comment": post.post.values_list('text_field')
+                "comment": post.post.values_list('text_field',flat=True)
                 }]
         dict_data = {
             'data': data,
@@ -123,7 +130,7 @@ def edit_post(request, id):
             return redirect(publish_post)
 
     else:
-        post_form = PostForm(request, instance=obj)
+        post_form = PostForm(request, instance=post)
     return render(
             request, "post/edit_post.html",
             {'form': post_form, 'obj': post}
@@ -146,12 +153,6 @@ def comment_post(request, id):
             instance.user = request.user
             instance.save()
             return redirect(publish_post)
-    else:
-        comment_form = CommentForm()
-    return render(
-            request, "post/comment_post.html",
-            {'form': comment_form, 'obj': post}
-            )
 
 
 def like_post(request, id):
@@ -164,7 +165,7 @@ def like_post(request, id):
         post.liked_users.remove(request.user)
     dict_data = {
         'post_id': post.id,
-        'like_value': like_user
+        'like_value': like_user,
     }
     return JsonResponse({'result': dict_data})
 

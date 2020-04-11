@@ -4,7 +4,7 @@ $(document).ready(function(){
         $.ajax({
                 type: "POST",
                 url: "/add-post",
-                data: JSON.stringify(form_data),
+                data: form_data,
                 success:function(){
             }
         });

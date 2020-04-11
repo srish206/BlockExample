@@ -1,53 +1,115 @@
 {% extends "index.html" %}
 {% load static %}
+{% load widget_tweaks %}
 {% load utils %}
 {% block title %} Home {% endblock %}
 {% block css_content %}
     <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/publish.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/comment.css' %}">
 {% endblock %}
 {% block content %}
-    {% for post in posts %}
-        <li class="list-cls col-md-4" style="background-color:white; width: 50%;" data-post="{{ post.id }}">{{ forloop.counter }}) Post Title:{{ post.title|capfirst }}<br>
-        Description:{{ post.description|capfirst }}<br>
-        Author:{{ post.author|capfirst }}<br>
-        <span class="like-cls">
-            {% if post.is_liked == False %}
-                <i class="fa fa-heart-o none-cls commen-cls" aria-hidden="true"></i>
-            {% else %}
-                <i class="fa fa-heart-o heart-cls commen-cls" aria-hidden="true"></i>
-            {% endif %}
-        </span>
-        {{ post.like_count }}<br>
-        Comments:   {% for comment in post.comments %}
-                        {{ comment.text_field }}<br>
-                    {% endfor %}
-
-        <div class="view-cls">
-            <a href={% url 'view_post' id=post.id %}>View</a>
-            <a href={% url 'comment_post' id=post.id %}>Comment</a>
+{% for post in posts %}
+<div class="container">
+    <div class="well">
+        <div class="media">
+            <div class="media-body">
+                <ul class="list-line list-unstyled">
+                    <h3>
+                        <strong class="media-heading">{{ post.title|capfirst }}</strong>
+                    </h3>
+                    <p class="textcss">{{ post.author|capfirst }} &emsp;
+                        <span>
+                            <i class="fa fa-calendar" aria-hidden="true"> {{ post.date }}</i>
+                            &emsp;{{ post.like_count }}
+                            <i class="fa fa-thumbs-o-up" aria-hidden="true"></i>
+                            &emsp;
+                            <i class="fa fa-comments-o" aria-hidden="true"> {{ post.comments|length }} comments</i>
+                        </span>
+                    </p>
+                    <div class="more">
+                        <p>
+                            {% if  post.des_len > 10 %}
+                                {{ post.description|slice:":5" }}
+                            {% endif %}
+                        </p>
+                        <button type="button" class="btn btn-light readmore">Read More <i   class= "fa fa-angle-down" aria-hidden="true"></i>
+                        </button>
+                        <p class="complete">
+                            {{ post.description }}
+                        </p>
+                    </div>
+                    <ul class="list-inline list-unstyled">
+                        <li class="list-cls" data-post="{{ post.id }}">
+                            <span class="like-cls">
+                                {% if post.is_liked == False %}
+                                    <i class="fa fa-heart-o none-cls commen-cls" aria-hidden="true"></i>
+                                {% else %}
+                                    <i class="fa fa-heart-o heart-cls commen-cls" aria-hidden="true"></i>
+                                {% endif %}
+                            </span>
+                        </li>
+                    </ul>
+                </ul>
+            </div>
         </div>
-        </li>
-    {% endfor %}
-
+        <div class="container commen_css">
+            <div class="well">
+                <div class="media">
+                    <div class="text-body">
+                        <a>Leave a Comment</a>
+                        <div>
+                            <form action="{% url 'comment_post' post.id %}" method = "POST">
+                                {% csrf_token %}
+                                <div class="textarea">
+                                    {% render_field form.text_field class="textarea" %}
+                                    <input type = "submit" value = "submit"></
+                                </div>
+                            </form>
+                        </div><br><br>
+                        <span>
+                            {% for comment in post.comments %}
+                                <h5 class="commented_user">{{ comment.user }}</h5>
+                                <p>{{ comment.text_field }}</p>
+                            {% endfor %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>            
+    </div>
+</div>
+{% endfor %}
 
     {% if posts.has_other_pages %}
         <ul class="pagination">
             {% if posts.has_previous %}
-                <li><a href="?page={{ posts.previous_page_number }}">&laquo;</a></li>
+                <li>
+                    <a href="?page={{ posts.previous_page_number }}">&laquo;</a>
+                </li>
             {% else %}
-                <li class="disabled"><span>&laquo;</span></li>
+                <li class="disabled">
+                    <span>&laquo;</span>
+                </li>
             {% endif %}
             {% for i in posts.paginator.page_range %}
                 {% if posts.number == i %}
-                <li class="active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+                    <li class="active">
+                        <span>{{ i }} <span class="sr-only">(current)</span></span>
+                    </li>
                 {% else %}
-                <li><a href="?page={{ i }}">{{ i }}</a></li>
+                    <li>
+                        <a href="?page={{ i }}">{{ i }}</a>
+                    </li>
                 {% endif %}
             {% endfor %}
             {% if posts.has_next %}
-                <li><a href="?page={{ posts.next_page_number }}">&raquo;</a></li>
+                    <li>
+                        <a href="?page={{ posts.next_page_number }}">&raquo;</a>
+                    </li>
             {% else %}
-                <li class="disabled"><span>&raquo;</span></li>
+                    <li class="disabled">
+                        <span>&raquo;</span>
+                    </li>
             {% endif %}
         </ul>
     {% endif %}
@@ -55,5 +117,6 @@
 
 
 {% block js_content %}
-    <script type="text/javascript" src="{% static 'PostJs/js/like.js' %}" ></script>
+    <script type="text/javascript" src="{% static 'PostJs/js/like.js' %}"></script>
+    <script type="text/javascript" src="{% static 'PostJs/js/readmore.js' %}"></script>
 {% endblock %}

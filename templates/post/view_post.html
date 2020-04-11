@@ -2,13 +2,35 @@
 {% load static %}
 {% block title %} view post {% endblock %}
 {% block content %}
-    {% for view in data %}
-        Title: {{ view.title }}<br>
-        Description: {{ view.description }}<br>
-        Publish Post: {{ view.publish_date }}<br>
-        Update Post: {{ view.update_date }}<br>
-        Comments: {% for comment in view.comment %}<br>
-                {{ comment }}
-        {% endfor %}
-    {% endfor %}
+{% for post in data %}
+<div class="container">
+    <div class="well">
+        <div class="media">
+            <div class="media-body">
+                <ul class="list-line list-unstyled">
+                    <h3>
+                        <strong class="media-heading">{{ post.title|capfirst }}</strong>
+                    </h3>
+                        <span>
+                            publish date: <i class="fa fa-calendar" aria-hidden="true"> {{ post.publish_date }}</i>&emsp;
+                            updated date: <i class="fa fa-calendar" aria-hidden="true"> {{ post.update_date }}</i>
+                        </span>
+                    </p>
+                    <div class="more">
+                        <p class="complete">
+                            Description: {{ post.description }}
+                        </p>
+                        <div>
+                        	Comments:	{% for comment in post.comment %}
+                            				<p>{{ comment }}</p>
+                            			{% endfor %}
+                        </div>    
+                    </div>
+                    
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
 {% endblock %}

@@ -1,11 +1,24 @@
 {% extends "index.html" %}
+{% load static %}
 {% block title %} comment post {% endblock %}
+{% block css_content %}
+    
+	<link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/comment.css' %}">
+{% endblock %}
 {% block content %}
 <form action="{% url 'comment_post' obj.id  %}" method = "POST">
     {{ obj.title }}
     {{ obj.description }}
-    {% csrf_token %}
-    {{ form.as_p }}
-    <input type = "submit" value = "submit">
+    <table class="textarea">
+    	{{ form.as_table }}
+    	<tr>
+    		<td>&nbsp;</td>
+    		<td><input type = "submit" value = "submit"></td>
+    	</tr>	
+    </table>
+    	{% csrf_token %}
 </form>
 {% endblock %}
+
+
+
