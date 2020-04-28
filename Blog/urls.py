@@ -37,5 +37,6 @@ urlpatterns = [
     path('delete-comment/<int:id>', views.delete_comment, name='delete-comment'),
     path('search-data', views.search_data, name='search-data'),
     path('silk/', include('silk.urls', namespace='silk')),
+    path('read-more/<int:id>', views.read_more, name='read_more'),
 
 ]

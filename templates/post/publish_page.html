@@ -3,7 +3,7 @@
 {% block title %} publish post {%endblock%}
 {% block css_content %}
     <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/publish.css' %}">
-    <link type="text/css" rel="stylesheet" href="path_to/simplePagination.css"/>
+    <!-- <link type="text/css" rel="stylesheet" href="path_to/simplePagination.css"/> -->
 {% endblock %}
 
 <!-- if we write any code for design,show data and etc it doesn't work.if we want then write code inside block content  -->
@@ -100,8 +100,11 @@
 {% endblock %}
 
 {% block js_content %}
-    <script type="text/javascript" src="path_to/jquery.js"></script>
-    <script type="text/javascript" src="path_to/jquery.simplePagination.js"></script>
+    <!-- <script type="text/javascript" src="path_to/jquery.js"></script> -->
+    <!-- <script type="text/javascript" src="path_to/jquery.simplePagination.js"></script> -->
     <script type="text/javascript" src="{% static 'PostJs/js/comment.js' %}" ></script>
     <script type="text/javascript" src="{% static 'PostJs/js/search.js' %}"></script>
 {% endblock %}
+
+
+

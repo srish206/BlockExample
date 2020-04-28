@@ -27,3 +27,15 @@ $(document).ready(function(){
             }); 
         })
 })
+
+$(document).on('click', '.replay-cls', function(){
+    debugger
+    comment_id = $(this).data('comment')
+    $(".replay-cls[data-comment]").each(function(index){
+        if($(this).data('comment') == comment_id){
+            $(this).siblings('div').children().first().removeClass('hide')
+            $(this).siblings('div').toggle()
+        }
+
+    })
+})

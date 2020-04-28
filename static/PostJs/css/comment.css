@@ -1,0 +1,29 @@
+<style type="text/css">
+
+    .text-body {
+      text-align: left;
+    }
+    .textarea{
+        width:  624px;
+        height: 60px;
+        
+    }
+    .commented_user {
+        color: #428bca; 
+    }
+
+    .blockquote_css {
+        border: none;
+        margin: 14px 0 10px;
+        font-size: 14.5px;
+    }
+
+    .symbol {
+        color: gray;
+    }
+
+    /*.form2 {
+        display: none;
+    }*/
+
+</style>
