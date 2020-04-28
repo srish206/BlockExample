@@ -1,5 +1,5 @@
-import json
 import datetime
+from silk.profiling.profiler import silk_profile
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
@@ -7,7 +7,6 @@ from django.forms.models import model_to_dict
 from Wordoid.models import Post, Comment
 from Wordoid.forms import PostForm, CommentForm
 from Wordoid.utils import get_paginated_objects
-from silk.profiling.profiler import silk_profile
 
 
 @silk_profile(name='View Blog Post')
@@ -31,8 +30,8 @@ def home_page(request):
     posts_data = get_paginated_objects(request, post_data)
 
     comment = CommentForm()
-    return render(request, "post/home.html",
-            {'posts': posts_data, 'form': comment})
+    return render(request, "post/home.html", {
+        'posts': posts_data, 'form': comment})
 
 
 @login_required
@@ -111,7 +110,7 @@ def view_post(request, id):
                 "description": post.description,
                 "publish_date": post.publish_date,
                 "update_date": post.update_date,
-                "comment": post.post.values_list('text_field',flat=True)
+                "comment": post.post.values_list('text_field', flat=True)
                 }]
         dict_data = {
             'data': data,
@@ -145,14 +144,33 @@ def delete_post(request, id):
 
 def comment_post(request, id):
     post = Post.objects.get(id=id)
+    parent_comment = post.post.filter(parent__isnull=True)
     if request.method == 'POST':
-        comment = CommentForm(request.POST)
-        if comment.is_valid():
-            instance = comment.save(commit=False)
+        comment_form = CommentForm(request.POST)
+        if comment_form.is_valid():
+            parent_obj = None
+            try:
+                parent_id = int(request.POST.get('parent_id'))
+            except:
+                parent_id = None
+            if parent_id:
+                parent_obj = Comment.objects.get(id=parent_id)
+                if parent_obj:
+                    replay_comment = comment_form.save(commit=False)
+                    replay_comment.parent = parent_obj
+
+            instance = comment_form.save(commit=False)
             instance.post = post
             instance.user = request.user
             instance.save()
-            return redirect(publish_post)
+            return redirect('read_more', post.id)
+    # else:
+    #     comment_form = CommentForm()
+    # return render(request,
+    #               'post/read_more.html',
+    #               {'post': post,
+    #                'comments': parent_comment,
+    #                'comment_form': comment_form})
 
 
 def like_post(request, id):
@@ -188,3 +206,17 @@ def search_data(request):
         'related_post': list(related_post.values())
     }
     return JsonResponse(dict_data)
+
+
+def read_more(request, id):
+    post = Post.objects.get(id=id)
+    parent_comment = post.post.filter(parent__isnull=True)
+    data = [{
+            "id": post.id,
+            "title": post.title,
+            "description": post.description,
+            "comments": post.post.all(),
+            }]
+    comment = CommentForm()
+    return render(request, "post/read_more.html", {
+        'data': data, 'form': comment, 'nowcomment': parent_comment})

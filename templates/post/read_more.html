@@ -1,0 +1,100 @@
+{% extends "index.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load utils %}
+{% block title %} Home {% endblock %}
+{% block css_content %}
+    <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/publish.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/comment.css' %}">
+{% endblock %}
+{% block content %}
+{% for post in data %}
+<div class="container">
+    <div class="well">
+        <div class="media">
+            <div class="media-body">
+                <ul class="list-line list-unstyled">
+                    <h3>
+                        <strong class="media-heading">{{ post.title|capfirst }}</strong>
+                    </h3>
+                    <div class="more">
+                        <p>
+                            {{ post.description }}
+                        </p>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <div class="container commen_css">
+            <div class="well">
+                <div class="media">
+                    <div class="text-body">
+                        <a>Leave a Comment</a>
+                        <div>
+                            <form id="{{post.id}}" action="{% url 'comment_post' post.id %}" method = "POST">
+                                {% csrf_token %}
+                                <div class="textarea">
+                                    {% render_field form.text_field class="textarea" %}
+                                    <input type = "submit" value = "submit">
+                                </div><br><br>
+                            </form>
+                        </div><br><br>
+                        {{ nowcomment.count }} Comments<br><br>
+                        {% for comment in nowcomment %}
+                            <div class="comment" style="">
+                                <h4 class="commented_user">{{ comment.user }}</h4>
+                                <p>{{ comment.text_field }}</p>
+                                <a class="replay-cls" data-comment="{{comment.id}}">Reply</a>
+                                <div class="form2" data-comm="{{comment.id}}">
+                                    <form class="hide" id="{{post.id}}" action="{% url 'comment_post' post.id %}" method = "POST">
+                                        {% csrf_token %}
+                                        <div class="textarea">
+                                            {% render_field form.text_field class="textarea" %}
+                                            <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                                            <input type="submit" value="Replay">
+                                        </div><br><br>
+                                    </form>
+                                </div>
+                                <blockquote class="blockquote_css">
+                                {% for reply in comment.replies.all %}
+                                    <p class="info">{{ reply.user }}
+                                        <i class="fa fa-share symbol" aria-hidden="true"> {{comment.user}} </i> 
+                                    </p>
+                                    <p>{{ reply.text_field }}</p>
+                                    <a>Reply</a>
+                                    <form id="{{post.id}}" action="{% url 'comment_post' post.id %}" method = "POST">
+                                            {% csrf_token %}
+                                            <div class="textarea">
+                                                {% render_field form.text_field class="textarea" %}
+                                                <input type="hidden" name="parent_id" value="{{ reply.id }}">
+                                                <input type="submit" value="reply">
+                                            </div><br><br>
+                                    </form>
+
+                                    <blockquote class="blockquote_css">
+                                    {% for rep in reply.replies.all %}
+                                        <span>{{ rep.user }}
+                                            <i class="fa fa-share symbol" aria-hidden="true">  {{ reply.user }} </i>
+                                        </span>
+                                        <p>{{ rep.text_field }}</p>
+                                    {% endfor %}
+                                    </blockquote>
+
+                                {% endfor %}
+                                </blockquote>
+                            </div>
+                    {% empty %}
+                        <h4>There are no comments yet.</h4>
+                    {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>              
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block js_content %}
+    <script type="text/javascript" src="{% static 'PostJs/js/comment.js' %}"></script>
+{% endblock %}

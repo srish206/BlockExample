@@ -32,8 +32,8 @@
                                 {{ post.description|slice:":5" }}
                             {% endif %}
                         </p>
-                        <button type="button" class="btn btn-light readmore">Read More <i   class= "fa fa-angle-down" aria-hidden="true"></i>
-                        </button>
+                        
+                      <a href={% url 'read_more' id=post.id %} class="readmore">ReadMore</a>
                         <p class="complete">
                             {{ post.description }}
                         </p>
@@ -52,30 +52,7 @@
                 </ul>
             </div>
         </div>
-        <div class="container commen_css">
-            <div class="well">
-                <div class="media">
-                    <div class="text-body">
-                        <a>Leave a Comment</a>
-                        <div>
-                            <form action="{% url 'comment_post' post.id %}" method = "POST">
-                                {% csrf_token %}
-                                <div class="textarea">
-                                    {% render_field form.text_field class="textarea" %}
-                                    <input type = "submit" value = "submit"></
-                                </div>
-                            </form>
-                        </div><br><br>
-                        <span>
-                            {% for comment in post.comments %}
-                                <h5 class="commented_user">{{ comment.user }}</h5>
-                                <p>{{ comment.text_field }}</p>
-                            {% endfor %}
-                        </span>
-                    </div>
-                </div>
-            </div>
-        </div>            
+                
     </div>
 </div>
 {% endfor %}
