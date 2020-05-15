@@ -40,8 +40,8 @@ class Comment(models.Model):
     like = models.IntegerField(default=0)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, related_name='replies')
 
-    def __str__(self):
-        return '%s %s' %(self.user.username, self.post)
+    def __str__(self):          
+        return '%s %s %s' %(self.user.username, self.post, self.text_field)
 
 
 ''' If the model field has blank=True, then required is set to False on the

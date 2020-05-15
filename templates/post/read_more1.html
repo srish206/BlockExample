@@ -1,0 +1,70 @@
+{% extends "index.html" %}
+{% load static %}
+{% load widget_tweaks %}
+{% load utils %}
+{% block title %} Home {% endblock %}
+{% block css_content %}
+    <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/publish.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'PostJs/css/comment.css' %}">
+{% endblock %}
+{% block content %}
+{% for post in data %}
+<div class="container">
+    <div class="well">
+        <div class="media">
+            <div class="media-body">
+                <ul class="list-line list-unstyled">
+                    <h3>
+                        <strong class="media-heading">{{ post.title|capfirst }}</strong>
+                    </h3>
+                    <div class="more">
+                        <p>
+                            {{ post.description }}
+                        </p>
+                    </div>
+                </ul>
+            </div>
+        </div>
+        <div class="container commen_css">
+            <div class="well">
+                <div class="media">
+                    <div class="text-body">
+                        <a>Leave a Comment</a>
+                        <div class="pop_cls">
+                            <form id="{{post.id}}" action="{% url 'comment_post' post.id %}" method = "POST">
+                                {% csrf_token %}
+                                <div class="textarea">
+                                    {% render_field form.text_field class="textarea" %}
+                                    <input type = "submit" value = "submit">
+                                </div><br><br>
+                            </form>
+                        </div><br><br>
+
+                        {% for comm in post.comments %}
+                        <div data-comm="{{ comm.id }}">
+                            {% if comm.parent %}
+                                {{ comm.user }} <i class="fa fa-share" aria-hidden="true"></i> {{ comm.parent.user }}<br>
+                            {% else %}
+                                {{ comm.user }}<br>
+                            {% endif %}
+                            {{ comm.text_field }}<br>
+                            <a data-rep="{{ comm.id }}" data-post="{{ post.id }}" class="rep">Reply</a>
+                            <div id="comment_add">
+
+                            </div>
+                        </div>
+                        {% endfor %}<br>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>           
+    </div>
+</div>
+{% endfor %}
+{% endblock %}
+
+{% block js_content %}
+    <script type="text/javascript" src="{% static 'PostJs/js/comment.js' %}"></script>
+{% endblock %}

@@ -7,6 +7,7 @@ from django.forms.models import model_to_dict
 from Wordoid.models import Post, Comment
 from Wordoid.forms import PostForm, CommentForm
 from Wordoid.utils import get_paginated_objects
+from django.views.decorators.csrf import csrf_exempt
 
 
 @silk_profile(name='View Blog Post')
@@ -142,6 +143,7 @@ def delete_post(request, id):
     return redirect(publish_post)
 
 
+@csrf_exempt
 def comment_post(request, id):
     post = Post.objects.get(id=id)
     parent_comment = post.post.filter(parent__isnull=True)
@@ -159,11 +161,27 @@ def comment_post(request, id):
                     replay_comment = comment_form.save(commit=False)
                     replay_comment.parent = parent_obj
 
-            instance = comment_form.save(commit=False)
-            instance.post = post
-            instance.user = request.user
-            instance.save()
-            return redirect('read_more', post.id)
+                instance = comment_form.save(commit=False)
+                instance.post = post
+                instance.user = request.user
+                instance.save()
+                print(replay_comment)
+                reply_comment = Comment.objects.filter(id=replay_comment.id)
+                prnt_obj = Comment.objects.filter(id=parent_obj.id)
+                data = {
+                    'lists': list(reply_comment.values()),
+                    'parent_id': parent_id,
+                    'parent_obj': list(prnt_obj.values()),
+                    'message': 'reply successfully saved',
+                    'status': 200
+                    }
+                return JsonResponse({'result': data})
+            else:
+                instance = comment_form.save(commit=False)
+                instance.post = post
+                instance.user = request.user
+                instance.save()
+                return redirect('read_more', post.id)
     # else:
     #     comment_form = CommentForm()
     # return render(request,
@@ -211,6 +229,13 @@ def search_data(request):
 def read_more(request, id):
     post = Post.objects.get(id=id)
     parent_comment = post.post.filter(parent__isnull=True)
+    print(post.post.all())
+    for item in Comment.objects.filter(parent__isnull=True):
+        print(item.text_field)
+        for child in item.replies.all():
+            print(child.text_field)
+            for child_of in child.replies.all():
+                print(child_of.text_field)
     data = [{
             "id": post.id,
             "title": post.title,
@@ -218,5 +243,8 @@ def read_more(request, id):
             "comments": post.post.all(),
             }]
     comment = CommentForm()
-    return render(request, "post/read_more.html", {
-        'data': data, 'form': comment, 'nowcomment': parent_comment})
+    return render(request, "post/read_more1.html", {
+            'data': data,
+            'form': comment,
+#            'formset': comment_form,
+            'nowcomment': parent_comment})
