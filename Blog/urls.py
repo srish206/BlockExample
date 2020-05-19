@@ -23,6 +23,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home_page, name='home_page'),
     path('accounts/', include('allauth.urls'), name='accounts'),
+    path('accounts/signup/user/', views.user_signup, name='user_signup'),
     path('show-post', views.show_post, name='show_post'),
     path('change-post/<int:id>', views.change_post, name='change_post'),
     path('add-post', views.add_post, name='add_post'),

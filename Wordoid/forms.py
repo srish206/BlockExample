@@ -1,7 +1,31 @@
 from django import forms
-from Wordoid.models import Post
-from Wordoid.models import Comment
+from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from Wordoid.models import Post, Comment
 # from Wordoid.validators import validate_text
+
+
+class ReaderSignUpForm(UserCreationForm):
+
+    CHOICES = (
+            ('reader', 'reader'),
+            ('author', 'author'),
+    )
+
+    user_type = forms.ChoiceField(
+        choices=CHOICES,
+        widget=forms.RadioSelect,
+        required=True)
+
+    def save(self, commit=False):
+        instance = super(ReaderSignUpForm, self).save(commit=True)
+        if commit:
+            instance.save()
+        return instance
+
+    class Meta(UserCreationForm.Meta):
+        model = User
+        fields = ('username', 'email',)
 
 
 class PostForm(forms.ModelForm):

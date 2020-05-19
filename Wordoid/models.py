@@ -5,11 +5,19 @@ from django.contrib.auth.models import User
 
 
 class UserProfile(models.Model):
+
+    CHOICES = (
+            ('R', 'reader'),
+            ('A', 'author')
+        )
+    username = models.CharField(max_length=32)
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    is_auther = models.BooleanField(default=False)
+    role = models.CharField(max_length=32 ,choices = CHOICES,default=False)
+    password = models.CharField(max_length = 32,null = True, blank = True,verbose_name = 'password' )
+
 
     def __str__(self):
-        return self.user.username
+        return self.role
 
 
 class Post(models.Model):
@@ -23,6 +31,12 @@ class Post(models.Model):
     liked_users = models.ManyToManyField(User)
     auther = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name="auther")
+
+    class Meta:
+        permissions = [
+                ('can_add_post','can add a post'),
+            ]
+
 
     @property
     def user_like(self):

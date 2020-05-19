@@ -2,12 +2,47 @@ import datetime
 from silk.profiling.profiler import silk_profile
 from django.shortcuts import render, redirect
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, permission_required
 from django.forms.models import model_to_dict
-from Wordoid.models import Post, Comment
-from Wordoid.forms import PostForm, CommentForm
-from Wordoid.utils import get_paginated_objects
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from django.contrib.auth.models import Group, Permission
+from django.contrib.contenttypes.models import ContentType
+from Wordoid.models import Post, Comment, UserProfile
+from Wordoid.forms import PostForm, CommentForm, ReaderSignUpForm
+from Wordoid.utils import get_paginated_objects
+
+
+def user_signup(request):
+    form = ReaderSignUpForm()
+    if request.method == "POST":
+        form = ReaderSignUpForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
+            email = form.cleaned_data.get('email')
+            user = authenticate(username=username, password=password)
+            role = request.POST.get('user_type')
+            profile = UserProfile.objects.create(user=user, role=role)
+            ct = ContentType.objects.get_for_model(Post)
+            permission = Permission.objects.get(
+                codename='can_add_post',
+                name='can add a post',
+                content_type=ct)
+            role = request.POST.get('user_type')
+            group = role or "Default"
+            g, created = Group.objects.get_or_create(name=group)
+            if profile.role == "author":
+                g.permissions.add(permission)
+                user.user_permissions.add(permission)
+            g.user_set.add(user)
+            login(request, user)
+            return redirect(home_page)
+    else:
+        form = ReaderSignUpForm()
+        return render(request, "post/signup.html", {'form': form})
 
 
 @silk_profile(name='View Blog Post')
@@ -73,7 +108,10 @@ def add_post(request):
     # post_instance.save()
 
 
+@permission_required('Wordoid.can_add_post', raise_exception=True)
 def post_model_form(request):
+    # user = User.objects.get(id=request.user.id)
+    # if user.has_perm('Wordoid.can_add_post'):
     if request.method == 'POST':
         add_post_form = PostForm(request, request.POST)
         if add_post_form.is_valid():
@@ -84,6 +122,7 @@ def post_model_form(request):
     else:
         add_post_form = PostForm(request)
     return render(request, "post/post_form.html", {'form': add_post_form})
+    # return HttpResponse("you do not have permission to add post")
 
 
 def publish_post(request):
@@ -244,7 +283,6 @@ def read_more(request, id):
             }]
     comment = CommentForm()
     return render(request, "post/read_more1.html", {
-            'data': data,
-            'form': comment,
-#            'formset': comment_form,
-            'nowcomment': parent_comment})
+        'data': data,
+        'form': comment,
+        'nowcomment': parent_comment})
