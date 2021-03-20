@@ -14,7 +14,7 @@ flake8-django==0.0.4
 gprof2dot==2019.11.30
 html5lib==1.0.1
 idna==2.9
-Jinja2==2.11.1
+Jinja2==2.11.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
 oauthlib==3.1.0
